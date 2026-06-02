@@ -1,0 +1,33 @@
+## Build directories
+build/
+*/build/
+
+## C++ build artifacts
+*.d
+*.slo
+*.lo
+*.o
+*.obj
+*.gch
+*.pch
+*.so
+*.dylib
+*.dll
+*.lai
+*.la
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+## Generated meshes and visualization output
+*.msh
+*.vtu
+*.pvtu
+*.pvd
+*.vtk
+
+## Local editor/system files
+.DS_Store
+Thumbs.db

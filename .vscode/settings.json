@@ -1,0 +1,6 @@
+{
+  "workbench.iconTheme": "material-icon-theme",
+  "material-icon-theme.folders.associations": {
+    "exam-day": "tasks"
+  }
+}

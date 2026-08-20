@@ -4,6 +4,7 @@ Finite element solver for the two-dimensional wave equation, developed for the c
 
 ## Team
 
+- Salvatore Mariano Librici - `salvatoremariano.librici@mail.polimi.it`
 - Rong Huang - `rong.huang@mail.polimi.it`
 - KHirdesh Kumar - `hirdesh.kumar@mail.polimi.it`
 - Mehdi Ghiasipour - `mehdi.ghiasipour@mail.polimi.it`

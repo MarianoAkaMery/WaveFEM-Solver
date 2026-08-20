@@ -31,3 +31,6 @@ build/
 ## Local editor/system files
 .DS_Store
 Thumbs.db
+
+## Local reference books
+Book Resources/

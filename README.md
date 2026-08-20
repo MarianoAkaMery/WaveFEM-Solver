@@ -38,8 +38,8 @@ The project must include both the implementation and a discussion of the numeric
 
 For a beginner-friendly overview before coding, see:
 
-- [`PROJECT_INTUITION_GUIDE.md`](PROJECT_INTUITION_GUIDE.md)
-- [`PROJECT_INTUITION_GUIDE.pdf`](PROJECT_INTUITION_GUIDE.pdf)
+- [`project-intuition-guide/README.md`](project-intuition-guide/README.md)
+- [`project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf`](project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf)
 
 ## Official Project Setup Notes
 

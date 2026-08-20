@@ -273,4 +273,168 @@ The project is a pipeline:
 If we understand this pipeline, the implementation becomes a structured programming task
 instead of a mysterious PDE problem.
 
+\section{Super Basic Picture}
+Think of the domain as a flat square surface. At each point, \(u(x,y,t)\) is the height
+of that surface.
+
+\begin{itemize}
+\item \(u=0\): the surface is flat.
+\item \(u>0\): the surface is above the flat position.
+\item \(u<0\): the surface is below the flat position.
+\item \(u_0\): the starting shape.
+\item \(u_1\): the starting velocity.
+\item \(f\): an external push.
+\end{itemize}
+
+The solver answers this question: if we know the starting shape and starting speed,
+what does the surface look like later?
+
+\section{Very Small Fake Mesh Example}
+FEM starts by cutting the domain into small pieces. In a very small square mesh:
+
+\begin{verbatim}
+o----o----o
+|    |    |
+o----o----o
+|    |    |
+o----o----o
+\end{verbatim}
+
+Each \texttt{o} is a node. In a simple \(P1\) method, the unknowns are the values of
+\(u\) at the nodes. If the boundary is fixed with \(u=0\), then all boundary nodes
+are known:
+
+\begin{verbatim}
+0----0----0
+|    |    |
+0----?----0
+|    |    |
+0----0----0
+\end{verbatim}
+
+Only the center node is unknown in this tiny example. In a real mesh there are many
+unknowns, collected in a vector:
+\[
+U = [u_1,u_2,u_3,\ldots,u_N].
+\]
+This is why the PDE becomes linear algebra.
+
+\section{What The Matrices Mean}
+The semi-discrete equation is
+\[
+M\ddot U + KU = F.
+\]
+Think of it like
+\[
+\text{mass}\cdot\text{acceleration}
++
+\text{stiffness}\cdot\text{displacement}
+=
+\text{force}.
+\]
+It is the multi-node version of the simple oscillator equation
+\[
+m x'' + kx = \text{force}.
+\]
+
+For a toy case with three unknown nodes:
+\begin{verbatim}
+U = [height at node 1,
+     height at node 2,
+     height at node 3]
+\end{verbatim}
+
+\begin{itemize}
+\item \(M\) tells how node masses/inertia are distributed.
+\item \(K\) tells how each node is connected to nearby nodes by spatial stiffness.
+\item \(F\) tells which nodes are pushed by the source term.
+\end{itemize}
+
+\section{One Time Step In Plain Words}
+At time \(t_n\), assume we know the previous shape \(U^{n-1}\) and the current shape
+\(U^n\). We want the next shape \(U^{n+1}\).
+
+For the centered method:
+\[
+M\frac{U^{n+1}-2U^n+U^{n-1}}{\Delta t^2}+KU^n=F^n.
+\]
+
+In code-like form:
+\begin{verbatim}
+rhs = dt^2 * F
+rhs -= dt^2 * K * current_solution
+rhs += 2 * M * current_solution
+rhs -= M * old_solution
+solve M * next_solution = rhs
+\end{verbatim}
+
+So each time step builds a right-hand side vector and solves a matrix system.
+
+\section{Visual Examples}
+\subsection*{Flat Start, No Force}
+If
+\[
+u_0=0,\qquad u_1=0,\qquad f=0,
+\]
+then the solution should remain zero forever. If the code creates waves here,
+something is wrong.
+
+\subsection*{Initial Bump, No Force}
+If
+\[
+u_0=\sin(\pi x)\sin(\pi y),\qquad u_1=0,\qquad f=0,
+\]
+the membrane starts as one smooth bump, then moves down and up again, oscillating over time.
+In ParaView this should look like a smooth vibrating surface.
+
+\subsection*{Zero Shape, Initial Velocity}
+If
+\[
+u_0=0,\qquad u_1=\sin(\pi x)\sin(\pi y),\qquad f=0,
+\]
+the membrane starts flat but immediately moves because it has initial velocity.
+This explains why the wave equation needs both \(u_0\) and \(u_1\).
+
+\subsection*{External Push}
+If
+\[
+u_0=0,\qquad u_1=0,\qquad f\neq 0,
+\]
+the membrane moves because the source term pushes it.
+
+\section{How To Think About ParaView Output}
+When ParaView opens a \texttt{.vtu} or \texttt{.pvd} file, we are looking at the vector
+\(U\) drawn on the mesh.
+
+Good signs:
+\begin{itemize}
+\item the boundary stays fixed if \(u=0\) on the boundary;
+\item the wave is smooth for smooth initial data;
+\item smaller mesh size gives a cleaner shape;
+\item smaller time step gives a more reliable animation;
+\item the solution does not explode.
+\end{itemize}
+
+Bad signs:
+\begin{itemize}
+\item boundary values move even though they should be fixed;
+\item the solution becomes huge very quickly;
+\item random oscillations appear;
+\item the wave disappears too fast without reason;
+\item output is empty or all one color when it should not be.
+\end{itemize}
+
+\section{Minimal Story For The Group}
+\begin{verbatim}
+We have a vibrating 2D surface.
+We split the surface into a mesh.
+The unknown is the height at mesh degrees of freedom.
+The weak form gives us two main matrices: M and K.
+M handles acceleration in time.
+K handles spatial bending/curvature.
+The PDE becomes M U'' + K U = F.
+A time method tells us how to compute the next U.
+Then we export U over time and check if the wave behaves correctly.
+\end{verbatim}
+
 \end{document}

@@ -3,6 +3,9 @@
 This document explains what we are going to build before writing the full codebase.
 It is written for computer science students with weak PDE background.
 
+Read this as a practical mental model first, not as a theorem list. The goal is to understand
+what the code is trying to do before asking GPT/Codex to generate the full solver.
+
 ## 1. What The Project Is About
 
 We must implement a finite element solver for the 2D wave equation:
@@ -352,3 +355,284 @@ PDE problem
 ```
 
 If we understand this pipeline, the implementation becomes a structured programming task instead of a mysterious PDE problem.
+
+## 17. Super Basic Picture
+
+Imagine the domain as a flat square surface:
+
+```text
+(0,1) x (0,1)
+
+top boundary fixed
+  -----------------
+  |               |
+  |   membrane    |
+  |               |
+  -----------------
+bottom boundary fixed
+```
+
+At each point, the solution `u(x,y,t)` is the height of the surface.
+
+Examples:
+
+- `u = 0`: the surface is flat.
+- `u > 0`: the surface is above the flat position.
+- `u < 0`: the surface is below the flat position.
+- `u_0`: the starting shape.
+- `u_1`: the starting velocity.
+- `f`: an external push.
+
+The solver answers this question:
+
+> If I know the starting shape and starting speed, what does the surface look like later?
+
+## 18. Very Small Fake Mesh Example
+
+FEM starts by cutting the domain into small pieces.
+
+Very rough picture:
+
+```text
+4 square cells:
+
+o----o----o
+|    |    |
+o----o----o
+|    |    |
+o----o----o
+```
+
+Each `o` is a node. In a simple `P1` method, the unknowns are the values of `u` at the nodes.
+
+If the boundary is fixed with `u = 0`, then all boundary nodes are known:
+
+```text
+0----0----0
+|    |    |
+0----?----0
+|    |    |
+0----0----0
+```
+
+Only the center node is really unknown in this tiny example.
+
+In a real mesh there are many nodes, so instead of one `?`, we have a vector:
+
+```text
+U = [u_1, u_2, u_3, ..., u_N]
+```
+
+This is why the PDE becomes linear algebra.
+
+## 19. What The Matrices Mean With A Toy Example
+
+The final semi-discrete equation is:
+
+```math
+M \ddot U + K U = F.
+```
+
+Think of it like a physical system:
+
+```text
+mass * acceleration + stiffness * displacement = force
+```
+
+This is the same idea as:
+
+```math
+m x'' + k x = force
+```
+
+but instead of one object moving up/down, we have many mesh nodes moving together.
+
+Toy version with 3 unknown nodes:
+
+```text
+U = [height at node 1,
+     height at node 2,
+     height at node 3]
+```
+
+Then:
+
+```text
+M tells how the node masses/inertia are distributed.
+K tells how each node is connected to nearby nodes by spatial stiffness.
+F tells which nodes are being pushed by the source term.
+```
+
+If `K` is large, the solution reacts strongly to curvature. If `M` is large, acceleration changes more slowly.
+
+## 20. One Time Step In Plain Words
+
+At time `t_n`, assume we know:
+
+```text
+U^{n-1}: previous shape
+U^n:     current shape
+```
+
+We want:
+
+```text
+U^{n+1}: next shape
+```
+
+For a centered explicit-like method:
+
+```math
+M \frac{U^{n+1} - 2U^n + U^{n-1}}{\Delta t^2}
++ K U^n = F^n.
+```
+
+Plain translation:
+
+```text
+next shape =
+  current motion effect
+  - stiffness effect
+  + external forcing effect
+```
+
+In code, this usually means:
+
+```text
+rhs = dt^2 * F
+rhs -= dt^2 * K * current_solution
+rhs += 2 * M * current_solution
+rhs -= M * old_solution
+solve M * next_solution = rhs
+```
+
+So each time step is not magic. It is just building a right-hand side vector and solving a matrix system.
+
+## 21. Visual Examples We Should Expect
+
+### Example A: Flat Start, No Force
+
+```text
+u_0 = 0
+u_1 = 0
+f = 0
+```
+
+Expected result:
+
+```text
+the solution remains zero forever
+```
+
+This is a basic sanity test. If the code creates waves here, something is wrong.
+
+### Example B: Initial Bump, No Force
+
+```text
+u_0 = sin(pi x) sin(pi y)
+u_1 = 0
+f = 0
+```
+
+Expected result:
+
+```text
+the membrane starts as one smooth bump,
+then moves down,
+then up again,
+oscillating over time.
+```
+
+In ParaView, this should look like a smooth vibrating surface.
+
+### Example C: Zero Shape, Initial Velocity
+
+```text
+u_0 = 0
+u_1 = sin(pi x) sin(pi y)
+f = 0
+```
+
+Expected result:
+
+```text
+the membrane starts flat,
+but immediately moves because it has initial velocity.
+```
+
+This reminds us why the wave equation needs both `u_0` and `u_1`.
+
+### Example D: External Push
+
+```text
+u_0 = 0
+u_1 = 0
+f != 0
+```
+
+Expected result:
+
+```text
+the membrane moves because the source term pushes it.
+```
+
+This is like applying a force from outside.
+
+## 22. How To Think About ParaView Output
+
+When ParaView opens a `.vtu` or `.pvd` file, we are not looking at formulas anymore.
+We are looking at the vector `U` drawn on the mesh.
+
+Good signs:
+
+- boundary stays fixed if `u = 0` on the boundary;
+- wave is smooth for smooth initial data;
+- smaller mesh size gives a cleaner shape;
+- smaller time step gives a more reliable animation;
+- solution does not explode.
+
+Bad signs:
+
+- boundary values move even though they should be fixed;
+- solution becomes huge very quickly;
+- strong random oscillations appear;
+- wave disappears too fast without reason;
+- output is empty or all one color when it should not be.
+
+## 23. How To Reason Before Coding
+
+Before writing a function, ask:
+
+```text
+Which mathematical object am I implementing?
+```
+
+Examples:
+
+- mesh creation implements the domain `Omega`;
+- finite element space implements `V_h`;
+- mass assembly implements `M`;
+- stiffness assembly implements `K`;
+- initial interpolation implements `u_0` and `u_1`;
+- time loop implements the time discretization;
+- output implements visualization and validation.
+
+This makes the code easier to explain.
+
+## 24. Minimal Story For The Group
+
+Use this story when studying together:
+
+```text
+We have a vibrating 2D surface.
+We split the surface into a mesh.
+The unknown is the height at mesh degrees of freedom.
+The weak form gives us two main matrices: M and K.
+M handles acceleration in time.
+K handles spatial bending/curvature.
+The PDE becomes M U'' + K U = F.
+A time method tells us how to compute the next U.
+Then we export U over time and check if the wave behaves correctly.
+```
+
+If everyone understands this story, the project is already much less abstract.

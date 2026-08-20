@@ -1,0 +1,276 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\setlist[itemize]{topsep=2pt,itemsep=2pt}
+\setlist[enumerate]{topsep=2pt,itemsep=2pt}
+
+\title{Project 2 Intuition Guide\\WaveFEM Solver}
+\author{Numerical Methods for PDE}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Purpose}
+This document explains what we are going to build before writing the full codebase.
+It is written for computer science students with weak PDE background.
+
+\section{What The Project Is About}
+We must implement a finite element solver for the 2D wave equation:
+\[
+\frac{\partial^2 u}{\partial t^2} - \Delta u = f \quad \text{in } \Omega
+\]
+with boundary and initial data:
+\[
+u = g \quad \text{on } \partial\Omega,
+\qquad
+u(0) = u_0,
+\qquad
+\partial_t u(0) = u_1.
+\]
+Intuitively, \(u(x,y,t)\) is a displacement. Think of a vibrating membrane, like a drum surface.
+At every point \((x,y)\) and time \(t\), \(u\) tells how high or low the membrane is.
+
+The project requires both implementation and discussion of space discretization, time discretization,
+stability, numerical dissipation, numerical dispersion, and computational aspects.
+
+\section{Meaning Of The PDE}
+The equation is
+\[
+u_{tt} - \Delta u = f.
+\]
+The term \(u_{tt}\) is acceleration in time. The term \(-\Delta u\) describes spatial tension:
+it compares the value at one point with nearby values. The term \(f\) is an external force.
+
+The boundary condition \(u=g\) fixes the membrane on the boundary. The easiest first case is
+\(g=0\), meaning the boundary is fixed at height zero. The initial condition \(u_0\) gives the
+initial shape, while \(u_1\) gives the initial velocity.
+
+\section{Weak Formulation}
+The computer does not solve the PDE point by point. FEM solves an integrated version.
+We multiply the PDE by a test function \(v\) and integrate:
+\[
+\int_\Omega u_{tt} v\,dx - \int_\Omega \Delta u\,v\,dx
+=
+\int_\Omega f v\,dx.
+\]
+After integrating by parts the Laplacian term:
+\[
+\int_\Omega u_{tt} v\,dx
++
+\int_\Omega \nabla u \cdot \nabla v\,dx
+=
+\int_\Omega f v\,dx.
+\]
+For homogeneous Dirichlet boundary conditions, the boundary term disappears because the test
+functions are zero on the boundary.
+
+Final weak form:
+\[
+(u_{tt},v)_\Omega + (\nabla u,\nabla v)_\Omega = (f,v)_\Omega
+\qquad \forall v \in V.
+\]
+The first term becomes the mass matrix part, the second becomes the stiffness matrix part,
+and the right-hand side becomes the force vector.
+
+\section{From Weak Form To Matrices}
+In FEM, we approximate
+\[
+u_h(x,y,t) = \sum_j U_j(t)\phi_j(x,y).
+\]
+The functions \(\phi_j\) are basis functions. The unknowns are the coefficients \(U_j(t)\).
+After inserting this approximation into the weak form, we get
+\[
+M\ddot U(t) + K U(t) = F(t),
+\]
+where
+\[
+M_{ij} = \int_\Omega \phi_j\phi_i\,dx,
+\qquad
+K_{ij} = \int_\Omega \nabla\phi_j \cdot \nabla\phi_i\,dx,
+\qquad
+F_i = \int_\Omega f\phi_i\,dx.
+\]
+This is the key translation from mathematics to code.
+
+\section{Time Discretization}
+The wave equation is second order in time, so we need displacement and velocity, or current
+and previous displacement. A simple centered finite difference method is
+\[
+M\frac{U^{n+1}-2U^n+U^{n-1}}{\Delta t^2} + K U^n = F^n.
+\]
+Equivalently,
+\[
+M U^{n+1}
+=
+\Delta t^2 F^n
+-\Delta t^2 K U^n
++2MU^n
+-MU^{n-1}.
+\]
+This method is intuitive and second order in time, but conditionally stable: \(\Delta t\)
+must be small enough compared to the mesh size.
+
+Another option is an implicit Newmark method. It is usually more stable for larger time steps,
+but each time step is more expensive because it requires solving a linear system involving
+both \(M\) and \(K\).
+
+\section{Stability, Dissipation, Dispersion}
+Stability means the numerical solution does not blow up for no physical reason.
+Numerical dissipation means the method artificially damps the wave. Numerical dispersion means
+waves travel at wrong numerical speeds, so the shape may shift or distort.
+
+Simple checks:
+\begin{itemize}
+\item with \(f=0\) and \(g=0\), energy should stay roughly constant for non-dissipative methods;
+\item smaller \(h\) and smaller \(\Delta t\) should improve accuracy;
+\item the wave amplitude should not disappear too quickly unless the method is dissipative;
+\item the numerical wave should not arrive too early or too late compared to an exact solution.
+\end{itemize}
+
+\section{First Validation Test}
+Use the unit square \(\Omega=(0,1)^2\) and the exact solution
+\[
+u(x,y,t) = \sin(\pi x)\sin(\pi y)\cos(\sqrt{2}\pi t).
+\]
+It satisfies homogeneous Dirichlet conditions because the sine is zero on the square boundary.
+For this solution:
+\[
+f=0,
+\qquad
+u_0(x,y)=\sin(\pi x)\sin(\pi y),
+\qquad
+u_1(x,y)=0.
+\]
+This is a good first test because we know what the solution should look like.
+
+\section{Implementation Plan}
+The code should follow the standard deal.II lab style.
+Suggested structure:
+\begin{itemize}
+\item \texttt{WaveEquation.hpp}: class declaration;
+\item \texttt{WaveEquation.cpp}: implementation;
+\item \texttt{main.cpp}: parameters and run call;
+\item \texttt{CMakeLists.txt}: build configuration;
+\item \texttt{README.md}: build/run instructions;
+\item \texttt{mesh/}: optional mesh scripts;
+\item \texttt{output/}: generated results.
+\end{itemize}
+
+Main methods:
+\begin{itemize}
+\item \texttt{setup()}: create mesh, finite element space, DoFs, matrices, vectors;
+\item \texttt{assemble\_matrices()}: assemble \(M\) and \(K\);
+\item \texttt{interpolate\_initial\_conditions()}: fill initial displacement and velocity;
+\item \texttt{solve\_time\_step()}: compute the next solution;
+\item \texttt{output\_results()}: write files for ParaView;
+\item \texttt{compute\_errors()}: compare with exact solution when available;
+\item \texttt{run()}: orchestrate the simulation.
+\end{itemize}
+
+\section{Algorithm In Pseudocode}
+\begin{verbatim}
+read parameters
+create mesh
+create finite element space
+distribute degrees of freedom
+assemble mass matrix M
+assemble stiffness matrix K
+interpolate u0 and u1
+compute U^0
+compute U^1 or initialize velocity
+
+for each time step:
+    assemble or evaluate F(t)
+    compute U^{n+1}
+    apply Dirichlet boundary conditions
+    compute optional error/energy
+    write output every few steps
+
+write summary CSV files
+\end{verbatim}
+
+\section{What To Look At In ParaView}
+The most important visualization is the displacement field \(u\). Useful outputs are:
+final displacement at time \(T\), animation over time, coarse/fine mesh comparison,
+and large/small \(\Delta t\) comparison.
+
+Check that the wave moves smoothly, the boundary condition is respected, the solution is not
+exploding, and the amplitude is plausible.
+
+\section{Experiments To Include}
+Minimum useful experiments:
+\begin{enumerate}
+\item exact solution test on \((0,1)^2\);
+\item error vs mesh size \(h\);
+\item error vs time step \(\Delta t\);
+\item energy over time for the homogeneous case;
+\item visual comparison in ParaView.
+\end{enumerate}
+
+\section{Group Split}
+One possible split for five people:
+\begin{itemize}
+\item Person 1: weak formulation and report explanation;
+\item Person 2: deal.II mesh, DoFs, matrices;
+\item Person 3: time discretization and solver;
+\item Person 4: validation, errors, energy plots;
+\item Person 5: ParaView output, README, final presentation.
+\end{itemize}
+
+\section{Oral Explanation}
+Short explanation:
+\begin{quote}
+We solve the 2D wave equation with the finite element method in space. After multiplying
+by test functions and integrating by parts, we obtain a weak form. Using Lagrange basis
+functions, this becomes a second-order ODE system in time, \(M U'' + K U = F\).
+We then choose a time discretization, apply Dirichlet boundary conditions, and advance
+the solution step by step. We validate the solver with an exact sinusoidal solution and
+study stability, dissipation, dispersion, and computational cost.
+\end{quote}
+
+Even shorter:
+\begin{quote}
+FEM turns the PDE into \(M U'' + K U = F\). Then the time method turns that ODE system
+into linear algebra at each time step.
+\end{quote}
+
+\section{Risk Checklist}
+\begin{itemize}
+\item sign of the Laplacian term: the weak form should have \(+\nabla u\cdot\nabla v\);
+\item boundary conditions: homogeneous Dirichlet is the easiest first case;
+\item initial velocity: the wave equation needs both \(u_0\) and \(u_1\);
+\item time step: explicit methods can blow up if \(\Delta t\) is too large;
+\item output frequency: do not write too many huge files;
+\item exact solution: verify that \(f\), \(u_0\), \(u_1\), and \(g\) match the formula;
+\item convergence: decreasing \(h\) and \(\Delta t\) should improve accuracy;
+\item energy: for the homogeneous case, energy should be approximately conserved unless
+the method is dissipative.
+\end{itemize}
+
+\section{Final Mental Model}
+The project is a pipeline:
+\[
+\begin{aligned}
+\text{PDE problem}
+&\to
+\text{weak formulation}
+\to
+\text{FEM matrices } M,K \\
+&\to
+\text{time stepping}
+\to
+\text{output}
+\to
+\text{validation and report}.
+\end{aligned}
+\]
+If we understand this pipeline, the implementation becomes a structured programming task
+instead of a mysterious PDE problem.
+
+\end{document}

@@ -36,6 +36,11 @@ The project must include both the implementation and a discussion of the numeric
 - stability, numerical dissipation and numerical dispersion;
 - computational and algorithmic aspects of the solver.
 
+For a beginner-friendly overview before coding, see:
+
+- [`PROJECT_INTUITION_GUIDE.md`](PROJECT_INTUITION_GUIDE.md)
+- [`PROJECT_INTUITION_GUIDE.pdf`](PROJECT_INTUITION_GUIDE.pdf)
+
 ## Official Project Setup Notes
 
 The official project template is available at:

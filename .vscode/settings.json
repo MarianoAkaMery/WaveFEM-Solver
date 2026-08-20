@@ -2,5 +2,6 @@
   "workbench.iconTheme": "material-icon-theme",
   "material-icon-theme.folders.associations": {
     "exam-day": "tasks"
-  }
+  },
+  "cmake.sourceDirectory": "D:/Dekstop/PDE/PROJECT - 058168 - Numerical Methods for PDE - Quarteroni - 2025-26/Laboratory Lectures/lab-01-poisson-1d"
 }

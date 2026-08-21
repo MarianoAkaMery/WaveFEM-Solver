@@ -14,6 +14,7 @@ set -euo pipefail
 if [[ -f /u/sw/etc/profile ]]; then
   # The Docker image used for the course does not expose `module` until this
   # profile is sourced.
+  export LOGNAME="${LOGNAME:-$(whoami)}"
   source /u/sw/etc/profile
 fi
 

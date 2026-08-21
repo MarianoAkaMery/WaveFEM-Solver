@@ -2,10 +2,44 @@
 
 These commands assume the course Docker/HPC environment with deal.II modules.
 
+Inside the `mery-polimi` Docker image, initialize the module system with:
+
+```bash
+source /u/sw/etc/profile
+module load gcc-glibc/11.2.0 dealii/9.5.1
+```
+
+Do not use `module load all`: that module does not exist.
+
+## One-Command Docker Workflow
+
+From inside the repository folder in Docker:
+
+```bash
+bash scripts/docker_build_run.sh
+```
+
+This script:
+
+- initializes the module system;
+- loads `gcc-glibc/11.2.0` and `dealii/9.5.1`;
+- configures CMake;
+- builds `wave_fem`;
+- runs the default validation;
+- tries to create diagnostic plots if matplotlib is available.
+
+If the project is in the shared Docker folder, a typical path is:
+
+```bash
+cd /home/jellyfish/shared-folder/WaveFEM-Solver
+bash scripts/docker_build_run.sh
+```
+
 ## Build
 
 ```bash
-module load gcc-glibc dealii
+source /u/sw/etc/profile
+module load gcc-glibc/11.2.0 dealii/9.5.1
 rm -rf build
 cmake -S . -B build
 cmake --build build -j$(nproc)
@@ -40,6 +74,8 @@ wave_fem [n_subdivisions] [degree] [final_time] [time_step] [output_frequency] [
 ## Run A Small Validation Suite
 
 ```bash
+source /u/sw/etc/profile
+module load gcc-glibc/11.2.0 dealii/9.5.1
 bash scripts/run_validation_suite.sh
 ```
 

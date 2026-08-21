@@ -41,6 +41,10 @@ For a beginner-friendly overview before coding, see:
 - [`project-intuition-guide/README.md`](project-intuition-guide/README.md)
 - [`project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf`](project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf)
 
+For build and run commands, see:
+
+- [`COMMANDS.md`](COMMANDS.md)
+
 ## Official Project Setup Notes
 
 The official project template is available at:
@@ -140,12 +144,12 @@ Time discretization options:
 
 ## Roadmap
 
-1. Create the project source layout in `src/`, following the official C++/deal.II template.
-2. Assemble the mass matrix `M` and stiffness matrix `K` once.
-3. Interpolate `u_0` and `u_1` on the finite element degrees of freedom.
-4. Implement a first time stepper for `M U'' + K U = F`.
-5. Handle homogeneous Dirichlet boundary conditions first, then non-homogeneous data.
-6. Export `.vtu`/`.pvd` output for ParaView visualization.
+1. Create the project source layout in `src/`, following the official C++/deal.II template. Done.
+2. Assemble the mass matrix `M` and stiffness matrix `K` once. Done.
+3. Interpolate `u_0` and `u_1` on the finite element degrees of freedom. Done.
+4. Implement a first time stepper for `M U'' + K U = F`. Done with Newmark average acceleration.
+5. Handle homogeneous Dirichlet boundary conditions first, then non-homogeneous data. Homogeneous Dirichlet done.
+6. Export `.vtu`/`.pvd` output for ParaView visualization. Done.
 7. Validate the solver with a manufactured solution on `(0, 1)^2`, for example:
 
 ```math

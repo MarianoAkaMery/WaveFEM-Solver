@@ -35,6 +35,34 @@ cd /home/jellyfish/shared-folder/WaveFEM-Solver
 bash scripts/docker_build_run.sh
 ```
 
+The default parameters are Mariano's current validation setup:
+
+- `n_subdivisions = 24`;
+- `degree = 1`;
+- `final_time = 1.0`;
+- `time_step = 0.005`;
+- `output_frequency = 10`;
+- `output_directory = output`.
+
+Every teammate can override them directly:
+
+```bash
+bash scripts/docker_build_run.sh 32 1 1.0 0.0025 10 output_fine
+```
+
+or with environment variables:
+
+```bash
+N_SUBDIVISIONS=48 TIME_STEP=0.0025 OUTPUT_DIRECTORY=output_48 \
+  bash scripts/docker_build_run.sh
+```
+
+To see the script options:
+
+```bash
+bash scripts/docker_build_run.sh --help
+```
+
 ## Build
 
 ```bash
@@ -82,6 +110,20 @@ bash scripts/run_validation_suite.sh
 This creates separate folders under `validation-output/` for coarse/fine mesh
 and large/small timestep experiments.
 
+The validation suite is configurable through environment variables. For example:
+
+```bash
+SPACE_NS="16 32 64" TIME_DTS="0.01 0.005 0.0025" \
+  bash scripts/run_validation_suite.sh
+```
+
+Useful variables:
+
+- `VALIDATION_OUTPUT_DIR`, default `validation-output`;
+- `SPACE_NS`, default `"12 24 48"`;
+- `TIME_DTS`, default `"0.02 0.01 0.005"`;
+- `MAKE_PLOTS`, default `yes`.
+
 ## Plot Diagnostics
 
 ```bash
@@ -115,6 +157,12 @@ Suggested ParaView checks:
 - play the time animation;
 - check that the boundary remains fixed at zero;
 - compare coarse/fine runs by changing `n_subdivisions`.
+
+Suggested screenshot folder for the report:
+
+```text
+resources/paraview-screenshots/
+```
 
 ## Expected Generated Files
 

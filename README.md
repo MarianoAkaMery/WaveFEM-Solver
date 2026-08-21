@@ -45,6 +45,11 @@ For build and run commands, see:
 
 - [`COMMANDS.md`](COMMANDS.md)
 
+For report and presentation material produced by the group, use:
+
+- [`resources/paraview-screenshots/`](resources/paraview-screenshots/) for
+  selected ParaView screenshots.
+
 ## Official Project Setup Notes
 
 The official project template is available at:

@@ -23,7 +23,12 @@ build/
 
 ## Generated meshes and visualization output
 output/
+output_*/
+output-*/
 validation-output/
+validation-output_*/
+validation-output-*/
+validation-*/
 *.msh
 *.vtu
 *.pvtu

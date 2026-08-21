@@ -63,7 +63,7 @@ Initial working codebase:
 - `scripts/run_validation_suite.sh`
 - `scripts/plot_diagnostics.py`
 - `COMMANDS.md`
-- `project-intuition-guide/`
+- `project-resources/project-intuition-guide/`
 
 The solver currently does:
 
@@ -191,7 +191,7 @@ We are working on Project 2 of Numerical Methods for PDE: a FEM solver for the
 in src/. Continue from the current codebase.
 
 Important:
-- Use the course lab style from Laboratory Lectures.
+- Use the course lab style from `project-resources/Laboratory Lectures/`.
 - Build and run inside Docker with:
   bash scripts/docker_build_run.sh
 - The current solver already builds and runs in mery-polimi.

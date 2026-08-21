@@ -38,8 +38,8 @@ The project must include both the implementation and a discussion of the numeric
 
 For a beginner-friendly overview before coding, see:
 
-- [`project-intuition-guide/README.md`](project-intuition-guide/README.md)
-- [`project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf`](project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf)
+- [`project-resources/project-intuition-guide/README.md`](project-resources/project-intuition-guide/README.md)
+- [`project-resources/project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf`](project-resources/project-intuition-guide/PROJECT_INTUITION_GUIDE.pdf)
 
 For build and run commands, see:
 
@@ -47,8 +47,8 @@ For build and run commands, see:
 
 For report and presentation material produced by the group, use:
 
-- [`resources/paraview-screenshots/`](resources/paraview-screenshots/) for
-  selected ParaView screenshots.
+- [`project-resources/report-assets/paraview-screenshots/`](project-resources/report-assets/paraview-screenshots/)
+  for selected ParaView screenshots.
 
 ## Official Project Setup Notes
 
@@ -89,19 +89,19 @@ https://github.com/michelebucelli/nmpde-labs-aa-25-26
 
 Relevant references in the local material:
 
-- `projects.pdf`: official Project 2 description and general delivery instructions;
+- `project-resources/projects.pdf`: official Project 2 description and general delivery instructions;
 - `lab-00-introduction`: development environment, deal.II, ParaView and laboratory repository;
 - `lab-01-poisson-1d`: basic structure of a stationary FEM solver (`setup`, `assemble`, `solve`, `output`);
 - `lab-02-poisson-2d`: 2D FEM implementation, mesh handling and boundary conditions;
 - `lab-04-heat`: time-dependent FEM problem, mass and stiffness matrices, time loop and ParaView output.
 
-The laboratory source code has been copied next to the corresponding PDFs, for example:
+The laboratory source code is stored next to the corresponding PDFs, for example:
 
-- `Laboratory lectures-20260602/lab-01-poisson-1d/src`;
-- `Laboratory lectures-20260602/lab-02-poisson-2d/src`;
-- `Laboratory lectures-20260602/lab-04-heat/src`;
-- `Laboratory lectures-20260602/common`;
-- `Laboratory lectures-20260602/examples`.
+- `project-resources/Laboratory Lectures/lab-01-poisson-1d/src`;
+- `project-resources/Laboratory Lectures/lab-02-poisson-2d/src`;
+- `project-resources/Laboratory Lectures/lab-04-heat/src`;
+- `project-resources/Laboratory Lectures/common`;
+- `project-resources/Laboratory Lectures/examples`.
 
 The laboratory folders are reference material. The actual project implementation should be developed in `src/`, following the official project template.
 

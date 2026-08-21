@@ -161,7 +161,7 @@ Suggested ParaView checks:
 Suggested screenshot folder for the report:
 
 ```text
-resources/paraview-screenshots/
+project-resources/report-assets/paraview-screenshots/
 ```
 
 ## Expected Generated Files

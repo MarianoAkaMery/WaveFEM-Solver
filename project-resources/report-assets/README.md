@@ -1,4 +1,4 @@
-# Project Resources
+# Report Assets
 
 This folder is for report and presentation material produced by the group.
 
